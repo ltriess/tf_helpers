@@ -7,6 +7,7 @@ import tensorflow as tf
 import numpy as np
 
 from tf_helpers.visu.confusion_matrix import confusion_matrix_image
+from tf_helpers.visu.colorful_tensors import expand_image_height
 
 tf.enable_eager_execution()
 
@@ -42,6 +43,23 @@ class TestConfusionMatrix(tf.test.TestCase):
 
         self.assertAlmostEqual(0, np.amin(conf_mat_img))
         self.assertAlmostEqual(255, np.amax(conf_mat_img))
+
+
+class TestExpandImageHeight(tf.test.TestCase):
+
+    def test_exceptions(self):
+        self.assertRaises(NotImplementedError, expand_image_height, tf.random.normal([1]*4), 3)
+        self.assertRaises(ValueError, expand_image_height, tf.random.normal([1]*2), 1)
+        self.assertRaises(ValueError, expand_image_height, tf.random.normal([1]*5), 8)
+        self.assertRaises(ValueError, expand_image_height, tf.random.normal([1]*3), 0)
+        self.assertRaises(ValueError, expand_image_height, tf.random.normal([1]*3), -1)
+        self.assertRaises(ValueError, expand_image_height, tf.random.normal([1]*3), 3.2)
+
+    def test_shape(self):
+        f = random.randint(1, 10)
+        h, w, c = random.randint(1, 40), random.randint(1, 100), random.randint(1, 10)
+        self.assertEqual((h * f, w, c),
+                         expand_image_height(tf.random.normal([h, w, c]), f).shape)
 
 
 if __name__ == '__main__':
