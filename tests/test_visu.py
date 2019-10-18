@@ -7,7 +7,7 @@ import tensorflow as tf
 import numpy as np
 
 from tf_helpers.visu.confusion_matrix import confusion_matrix_image
-from tf_helpers.visu.colorful_tensors import expand_image_height
+from tf_helpers.visu.colorful_tensors import expand_image_height, create_image
 
 tf.enable_eager_execution()
 
@@ -60,6 +60,48 @@ class TestExpandImageHeight(tf.test.TestCase):
         h, w, c = random.randint(1, 40), random.randint(1, 100), random.randint(1, 10)
         self.assertEqual((h * f, w, c),
                          expand_image_height(tf.random.normal([h, w, c]), f).shape)
+
+
+class TestCreateImage(tf.test.TestCase):
+
+    def setUp(self):
+        self.shape = (20, 80)
+        self.tensor = tf.random.normal(self.shape, mean=10, stddev=20, dtype=tf.float32)
+        self.mask = tf.convert_to_tensor(np.random.choice([0, 1], self.shape), dtype=tf.bool)
+
+    def test_exceptions(self):
+        self.assertRaises(TypeError, create_image, self.tensor, mask=tf.cast(self.mask, dtype=tf.int64))
+        self.assertRaises(ValueError, create_image, self.tensor[:, 10:], mask=self.mask)
+        self.assertRaises(ValueError, create_image, self.tensor, minval=20, maxval=10)
+        self.assertRaises(ValueError, create_image, self.tensor, expand_height=0)
+        self.assertRaises(ValueError, create_image, self.tensor, cycle_color_map=0)
+        self.assertRaises(ValueError, create_image, self.tensor, cmap='norealcmap')
+
+    def test_shape_and_type(self):
+        # No 1
+        image = create_image(self.tensor)
+        self.assertEqual((1, *self.shape, 3), image.shape)
+        self.assertEqual(tf.uint8, image.dtype)
+
+        # No 2
+        image = create_image(self.tensor, mask=self.mask)
+        self.assertEqual((1, *self.shape, 3), image.shape)
+        self.assertEqual(tf.uint8, image.dtype)
+
+        # No 3
+        image = create_image(self.tensor, expand_height=8)
+        self.assertEqual((1, 8 * self.shape[0], self.shape[1], 3), image.shape)
+
+    def test_color_scaling(self):
+        for mi in [random.uniform(-100, 100) for _ in range(10)]:
+            for ma in [random.uniform(0, 200) for _ in range(10)]:
+                if ma <= mi:
+                    self.assertRaises(ValueError, create_image, self.tensor, minval=mi, maxval=ma)
+                else:
+                    image = create_image(self.tensor, minval=mi, maxval=ma)
+                    self.assertLessEqual(0, np.amin(image))
+                    self.assertGreaterEqual(255, np.amax(image))
+                    self.assertLess(1, np.mean(image))
 
 
 if __name__ == '__main__':
