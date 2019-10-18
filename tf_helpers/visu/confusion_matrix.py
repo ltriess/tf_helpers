@@ -30,7 +30,7 @@ def confusion_matrix_image(
 
     Returns:
         Tensor(shape=[1, fig_dpi * fig_size, fig_dpi * fig_size, 3], dtype=tf.uint8): An RGB image.
-        The first dimension corresponds to the `batch_size` to be published with `tf.summary.image`.
+            The first dimension corresponds to the `batch_size` to be published with `tf.summary.image`.
 
     Raises:
         ValueError: If length of class_names does not match the dimensions of tf_conf_mat.

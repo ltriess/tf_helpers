@@ -22,7 +22,7 @@ def expand_image_height(
     Raises:
         NotImplementedError: When `tf_image` has rank 4. Batch dimension is not yet supported.
         ValueError: When `tf_image` has a different rank than 3 and 4.
-        ValueError: If `factor` is an integer greater or equal to 1.
+        ValueError: If `factor` is not an integer greater or equal to 1.
 
     """
 
