@@ -9,8 +9,8 @@ from mpl_toolkits import axes_grid1
 
 
 def confusion_matrix_image(
-        tf_conf_mat: tf.Tensor, class_names: list, fig_dpi: int=320, fig_size: int=3,
-        normalize: bool=True, cmap: plt.cm=plt.cm.Blues, scope: str=None
+        tf_conf_mat: tf.Tensor, class_names: list, fig_dpi: int = 320, fig_size: int = 3,
+        normalize: bool = True, cmap: plt.cm = plt.cm.Blues, scope: str = None
 ):
 
     """
