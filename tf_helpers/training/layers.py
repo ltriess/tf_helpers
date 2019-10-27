@@ -128,3 +128,52 @@ def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
         )
 
     return out
+
+
+def cyclic_padding(tensor: tf.Tensor, kernel_size: tuple, strides: tuple, scope: str = None):
+    """
+    This operation is a high-level wrapper for tf.pad(mode="CYCLIC") that computes the amount of
+    padding for each dimension based on the `kernel_size` and `strides` specified. This function
+    is intended to be a convenience wrapper when using convolutional layers with cyclic padding.
+    It takes a tf.Tensor(shape=[N, H, W, C]) and performs zero padding in H and cyclic padding in W.
+
+    For example:
+    ```python
+    t = tf.random.normal([4, 10, 50, 2])
+
+    k_size = (3, 3)
+    strides = (1, 1)
+
+    t_padded = tf_helpers.cyclic_padding(t, k_size, strides)
+    tf.layers.conv2d(t_padded, k_size, strides, padding='valid')
+
+    # results in the same shape as
+    # tf.layers.conv2d(t, k_size, strides, padding='same')
+    ```
+
+    Parameters:
+        tensor: A `Tensor` of rank 4.
+        kernel_size: A `tuple` of two integers.
+        strides: A `tuple` of two integers.
+        scope (str): A name for the operation.
+
+    Returns:
+        A `Tensor`. Has same type as `tensor`.
+    """
+
+    with tf.variable_scope(name_or_scope=scope, default_name='cyclic_padding'):
+
+        inp_h, inp_w = tensor.get_shape().as_list()[1:3]
+
+        pad_top, pad_bottom, pad_left, pad_right = get_padding_sizes(
+            (inp_h, inp_w), kernel_size, strides)
+
+        # Zero padding in the vertical dimension
+        inp_pad_vertical = tf.pad(tensor, [[0, 0], [pad_top, pad_bottom], [0, 0], [0, 0]],
+                                  mode='CONSTANT', constant_values=0)
+
+        # Cyclic padding in the horizontal dimension
+        out = pad(inp_pad_vertical,
+                  tf.convert_to_tensor([[0, 0], [0, 0], [pad_left, pad_right], [0, 0]]),
+                  mode='CYCLIC')
+    return out
