@@ -92,7 +92,7 @@ def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
                                    #  [2, 3, 1, 2, 3, 1]]
     ```
 
-    Args:
+    Parameters:
         tensor: A `Tensor`.
         paddings: A `Tensor` of type `int32`.
         mode: One of "CONSTANT", "REFLECT", "SYMMETRIC", or "CYCLIC" (case-insensitive)
@@ -105,19 +105,20 @@ def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
     """
 
     if mode.upper() == 'CYCLIC':
-        rank = paddings.shape.as_list()[0]
-        perm = [(i + 1) % rank for i in range(rank)]
+        with tf.name_scope(name):
+            rank = paddings.shape.as_list()[0]
+            perm = [(i + 1) % rank for i in range(rank)]
 
-        out = tensor
-        for r in range(rank):
-            # Create the padding slices and concat them to the original tensor
-            out = tf.concat(
-                [out[tf.shape(out)[0] - paddings[r, 0]:, ...], out, out[:paddings[r, 1], ...]],
-                axis=0
-            )
+            out = tensor
+            for r in range(rank):
+                # Create the padding slices and concat them to the original tensor
+                out = tf.concat(
+                    [out[tf.shape(out)[0] - paddings[r, 0]:, ...], out, out[:paddings[r, 1], ...]],
+                    axis=0
+                )
 
-            # Move dimension of interest to position 0 for next step
-            out = tf.transpose(out, perm)
+                # Move dimension of interest to position 0 for next step
+                out = tf.transpose(out, perm)
     else:
         out = tf.pad(
             tensor,
