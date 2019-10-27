@@ -60,3 +60,71 @@ def get_padding_sizes(
         pad_right = pad_w - pad_left  # amount of padding on the right
 
     return pad_top, pad_bottom, pad_left, pad_right
+
+
+def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
+    """Pads a tensor.
+
+    This operation pads a `tensor` according to the `paddings` you specify.
+    `paddings` is an integer tensor with shape `[n, 2]`, where n is the rank of
+    `tensor`. For each dimension D of `input`, `paddings[D, 0]` indicates how
+    many values to add before the contents of `tensor` in that dimension, and
+    `paddings[D, 1]` indicates how many values to add after the contents of
+    `tensor` in that dimension.
+
+    The padded size of each dimension D of the output is:
+
+    `paddings[D, 0] + tensor.dim_size(D) + paddings[D, 1]`
+
+    For `mode` `CONSTANT`, `REFLECT`, and `SYMMETRIC` take a look at the TF documentation:
+    https://www.tensorflow.org/api_docs/python/tf/pad
+
+    If `mode` is "CYCLIC" then both `paddings[D, 0]` and `paddings[D, 1]` must be
+    no greater than `tensor.dim_size(D)`.
+
+    Example for `mode` `CYCLIC`:
+
+    ```python
+    t = tf.constant([[1, 2, 3], [4, 5, 6]])
+    paddings = tf.constant([[0, 1], [2, 1]])
+    tf.pad(t, paddings, "CYCLIC")  # [[2, 3, 1, 2, 3, 1],
+                                   #  [5, 6, 4, 5, 6, 4],
+                                   #  [2, 3, 1, 2, 3, 1]]
+    ```
+
+    Args:
+        tensor: A `Tensor`.
+        paddings: A `Tensor` of type `int32`.
+        mode: One of "CONSTANT", "REFLECT", "SYMMETRIC", or "CYCLIC" (case-insensitive)
+        name: A name for the operation (optional).
+        constant_values: In "CONSTANT" mode, the scalar pad value to use. Must be
+          same type as `tensor`.
+
+      Returns:
+        A `Tensor`. Has the same type as `tensor`.
+    """
+
+    if mode.upper() == 'CYCLIC':
+        rank = paddings.shape.as_list()[0]
+        perm = [(i + 1) % rank for i in range(rank)]
+
+        out = tensor
+        for r in range(rank):
+            # Create the padding slices and concat them to the original tensor
+            out = tf.concat(
+                [out[tf.shape(out)[0] - paddings[r, 0]:, ...], out, out[:paddings[r, 1], ...]],
+                axis=0
+            )
+
+            # Move dimension of interest to position 0 for next step
+            out = tf.transpose(out, perm)
+    else:
+        out = tf.pad(
+            tensor,
+            paddings,
+            mode=mode,
+            constant_values=constant_values,
+            name=name
+        )
+
+    return out

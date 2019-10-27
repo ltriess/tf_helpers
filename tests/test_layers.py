@@ -2,7 +2,7 @@
 
 import tensorflow as tf
 
-from tf_helpers.training.layers import get_padding_sizes
+from tf_helpers.training.layers import get_padding_sizes, pad
 
 tf.enable_eager_execution()
 
@@ -27,3 +27,22 @@ class TestGetPaddingSizes(tf.test.TestCase):
         for o in output:
             self.assertIsInstance(o, int)
             self.assertLessEqual(0, o)
+
+
+class TestPad(tf.test.TestCase):
+
+    def test_shapes(self):
+        t_shape = [4, 8]
+        t = tf.random.uniform(t_shape, 0, 100, dtype=tf.int64)
+        p = [[0, 1], [2, 1]]
+
+        out_shape = [j + sum(k) for j, k in zip(t_shape, p)]
+
+        modes = ['CONSTANT', 'REFLECT', 'SYMMETRIC', 'CYCLIC']
+        for m in modes:
+            o = pad(t, tf.convert_to_tensor(p), mode=m)
+            self.assertEqual(out_shape, o.shape)
+
+
+if __name__ == '__main__':
+    tf.test.main()
