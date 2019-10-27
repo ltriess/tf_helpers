@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+__author__ = """Larissa Triess"""
+__email__ = 'mail@triess.eu'
+
 import tensorflow as tf
 
 from tf_helpers.training.layers import get_padding_sizes, pad
