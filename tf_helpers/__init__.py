@@ -2,6 +2,3 @@
 
 __author__ = """Larissa Triess"""
 __email__ = 'mail@triess.eu'
-
-from .training import *
-from .visu import *
