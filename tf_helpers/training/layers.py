@@ -69,7 +69,7 @@ def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
     """Pads a tensor.
 
     This operation pads a `tensor` according to the `paddings` you specify.
-    `paddings` is an integer tensor with shape `[n, 2]`, where n is the rank of
+    `paddings` is a list of integers with shape `[n, 2]`, where n is the rank of
     `tensor`. For each dimension D of `input`, `paddings[D, 0]` indicates how
     many values to add before the contents of `tensor` in that dimension, and
     `paddings[D, 1]` indicates how many values to add after the contents of
@@ -97,7 +97,7 @@ def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
 
     Parameters:
         tensor: A `Tensor`.
-        paddings: A `Tensor` of type `int32`.
+        paddings: A list of integers.
         mode: One of "CONSTANT", "REFLECT", "SYMMETRIC", or "CYCLIC" (case-insensitive)
         name: A name for the operation (optional).
         constant_values: In "CONSTANT" mode, the scalar pad value to use. Must be
@@ -106,26 +106,30 @@ def pad(tensor, paddings, mode='CONSTANT', constant_values=0, name=None):
       Returns:
         A `Tensor`. Has the same type as `tensor`.
     """
+    tf_pads = tf.convert_to_tensor(paddings)
 
     if mode.upper() == 'CYCLIC':
         with tf.name_scope(name):
-            rank = paddings.shape.as_list()[0]
+            rank = len(paddings)
             perm = [(i + 1) % rank for i in range(rank)]
 
             out = tensor
             for r in range(rank):
                 # Create the padding slices and concat them to the original tensor
                 out = tf.concat(
-                    [out[tf.shape(out)[0] - paddings[r, 0]:, ...], out, out[:paddings[r, 1], ...]],
+                    [out[tf.shape(out)[0] - tf_pads[r, 0]:, ...], out, out[:tf_pads[r, 1], ...]],
                     axis=0
                 )
 
                 # Move dimension of interest to position 0 for next step
                 out = tf.transpose(out, perm)
+
+            out.set_shape([None if t is None else t + p[0] + p[1] for t, p in
+                           zip(tensor.get_shape().as_list(), paddings)])
     else:
         out = tf.pad(
             tensor,
-            paddings,
+            tf_pads,
             mode=mode,
             constant_values=constant_values,
             name=name
@@ -178,6 +182,6 @@ def cyclic_padding(tensor: tf.Tensor, kernel_size: tuple, strides: tuple, scope:
 
         # Cyclic padding in the horizontal dimension
         out = pad(inp_pad_vertical,
-                  tf.convert_to_tensor([[0, 0], [0, 0], [pad_left, pad_right], [0, 0]]),
+                  [[0, 0], [0, 0], [pad_left, pad_right], [0, 0]],
                   mode='CYCLIC')
     return out
