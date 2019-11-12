@@ -9,7 +9,8 @@ import tensorflow as tf
 
 
 def get_padding_sizes(
-        spacial_dimensions: tuple, kernel_size: tuple, strides: tuple, scope: str = None
+        spacial_dimensions: list or tuple, kernel_size: list or tuple, strides: list or tuple,
+        scope: str = None
 ):
 
     """
@@ -17,11 +18,11 @@ def get_padding_sizes(
     of a 2D convolution with `same` padding. The computation is equivalent to TF implementation.
 
     Parameters:
-        spacial_dimensions (tuple): A tuple of two integers corresponding to the spacial
+        spacial_dimensions (list | tuple): A tuple of two integers corresponding to the spacial
             dimensions H and W of Tensor(shape=[N, H, W, C]).
-        kernel_size (tuple): A tuple of two integers defining the kernel size of a
+        kernel_size (list | tuple): A tuple of two integers defining the kernel size of a
             convolution for which to compute the corresponding padding of the input tensor.
-        strides (tuple): A tuple of two integers defining the strides of a
+        strides (list | tuple): A tuple of two integers defining the strides of a
             convolution for which to compute the corresponding padding of the input tensor.
         scope (str): The name scope of the function.
 
@@ -30,16 +31,16 @@ def get_padding_sizes(
             left, and right, respectively.
 
     Raises:
-        TypeError: When `spacial_dimensions`, `kernel_size`, or `strides` are not tuples of integers.
+        TypeError: When `spacial_dimensions`, `kernel_size`, or `strides` do not have length 2.
         ValueError: If `strides` is smaller than 1 or greater than the spacial dimension.
         ValueError: If `kernel_size` is smaller than 1 or greater than the spacial dimension.
     """
 
-    if not (isinstance(spacial_dimensions, tuple) and all([isinstance(d, int) for d in spacial_dimensions])):
-        raise TypeError('`spacial_dimensions` must be a tuple of two integers.')
-    if not (isinstance(kernel_size, tuple) and all([isinstance(k, int) for k in kernel_size])):
+    if not len(spacial_dimensions) == 2:
+        raise TypeError('`spacial_dimensions` must be a list or tuple of two integers.')
+    if not len(kernel_size) == 2:
         raise TypeError('`kernel_size` must be a tuple of two integers.')
-    if not (isinstance(strides, tuple) and all([isinstance(s, int) for s in strides])):
+    if not len(strides) == 2:
         raise TypeError('`strides` must be a tuple of two integers.')
     if not all([1 <= s <= d for s, d in zip(strides, spacial_dimensions)]):
         raise ValueError('Strides cannot be smaller than 1 or greater than the corresponding '
