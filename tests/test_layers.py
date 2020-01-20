@@ -43,7 +43,7 @@ class TestPad(tf.test.TestCase):
 
         modes = ['CONSTANT', 'REFLECT', 'SYMMETRIC', 'CYCLIC']
         for m in modes:
-            o = pad(t, tf.convert_to_tensor(p), mode=m)
+            o = pad(t, p, mode=m)
             self.assertEqual(out_shape, o.shape)
 
 

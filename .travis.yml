@@ -1,0 +1,11 @@
+language: python
+python:
+    - "3.6"
+env:
+    - TENSORFLOW_VERSION=1.13.2
+cache: pip
+install:
+    - pip install -q tensorflow==$TENSORFLOW_VERSION
+    - pip install .
+script:
+    - python setup.py test

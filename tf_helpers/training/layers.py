@@ -36,11 +36,11 @@ def get_padding_sizes(
         ValueError: If `kernel_size` is smaller than 1 or greater than the spacial dimension.
     """
 
-    if not len(spacial_dimensions) == 2:
+    if not len(spacial_dimensions) == 2 or not all(isinstance(x, int) for x in spacial_dimensions):
         raise TypeError('`spacial_dimensions` must be a list or tuple of two integers.')
-    if not len(kernel_size) == 2:
+    if not len(kernel_size) == 2 or not all(isinstance(x, int) for x in kernel_size):
         raise TypeError('`kernel_size` must be a tuple of two integers.')
-    if not len(strides) == 2:
+    if not len(strides) == 2 or not all(isinstance(x, int) for x in strides):
         raise TypeError('`strides` must be a tuple of two integers.')
     if not all([1 <= s <= d for s, d in zip(strides, spacial_dimensions)]):
         raise ValueError('Strides cannot be smaller than 1 or greater than the corresponding '
