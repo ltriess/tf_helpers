@@ -1,4 +1,7 @@
 # tf_helpers
+[![Build Status](https://travis-ci.com/ltriess/tf_helpers.svg?branch=master)](https://travis-ci.org/ltriess/tf_helpers)
+[![License](https://img.shields.io/pypi/l/tf_helpers)](https://pypi.org/project/tf_helpers/)
+
 A collection of useful functions for TensorFlow for training and visualization.
 
 Written in TensorFlow.
