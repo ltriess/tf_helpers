@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='tf_helpers',
-    version='0.0.1',
+    version='0.0.2',
     author='Larissa Triess',
     author_email='mail@triess.eu',
     description='A collection of useful functions for TensorFlow for training and visualization.',
@@ -18,6 +18,6 @@ setup(
     ],
     extras_require={
         'tf': ['tensorflow'],
-        'tf_gpu': ['tensorflow-gpu'],
+        'tf-gpu': ['tensorflow-gpu'],
     },
 )
